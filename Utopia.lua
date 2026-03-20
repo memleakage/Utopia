@@ -534,6 +534,8 @@ Library.Thread = function(self, Function)
 end
 
 Library.SafeCall = function(self, Function, ...)
+    if not Function or type(Function) ~= "function" then return end 
+
     local Arguements = { ... }
     local Success, Result = pcall(Function, TableUnpack(Arguements))
 
@@ -4605,7 +4607,9 @@ Library.Sections.Toggle = function(self, Data)
         Default = Toggle.Default,
         Callback = function(Value)
             Toggle.Value = Value
-            Library:SafeCall(Data.Callback, Value)
+            if Data.Callback or Data.callback then
+                Library:SafeCall(Data.Callback or Data.callback, Value)
+            end
         end,
     })
 
@@ -4703,7 +4707,14 @@ Library.Sections.Button = function(self, Data)
         Name = Button.Name,
         Parent = Button.Section.Items["Content"],
         Callback = Button.Callback,
-        Risky = Button.Risky
+        Risky = Button.Risky,
+        Callback = function()
+            if Data.Callback then
+                Library:SafeCall(Data.Callback)
+            elseif Data.callback then
+                Library:SafeCall(Data.callback)
+            end
+        end
     })
 
     function Button:SetVisibility(Bool)
@@ -4749,7 +4760,6 @@ Library.Sections.Slider = function(self, Data)
         Max = Data.Max or Data.max or 100,
         Suffix = Data.Suffix or Data.suffix or "",
         Decimals = Data.Decimals or Data.decimals or 1,
-        Callback = Data.Callback or Data.callback or function() end,
     }
 
     local NewSlider, Items = Components.Slider({
@@ -4761,8 +4771,15 @@ Library.Sections.Slider = function(self, Data)
         Max = Slider.Max,
         Suffix = Slider.Suffix,
         Decimals = Slider.Decimals,
-        Callback = Slider.Callback,
-        Risky = Data.Risky
+        Risky = Data.Risky,
+
+        Callback = function(Value)
+            if Data.Callback then
+                Library:SafeCall(Data.Callback, Value)
+            elseif Data.callback then
+                Library:SafeCall(Data.callback, Value)
+            end
+        end
     })
 
     function Slider:Set(Value)
@@ -4802,7 +4819,14 @@ Library.Sections.Dropdown = function(self, Data)
         Default = Dropdown.Default,
         Callback = Dropdown.Callback,
         Multi = Dropdown.Multi,
-        Risky = Data.Risky 
+        Risky = Data.Risky,
+        Callback = function(Value)
+            if Data.Callback then
+                Library:SafeCall(Data.Callback, Value)
+            elseif Data.callback then
+                Library:SafeCall(Data.callback, Value)
+            end
+        end 
     })
 
     function Dropdown:Set(Value)
@@ -4960,7 +4984,14 @@ Library.Sections.Textbox = function(self, Data)
         Default = Textbox.Default,
         Placeholder = Textbox.Placeholder,
         Callback = Textbox.Callback,
-        Risky = Data.Risky
+        Risky = Data.Risky,
+        Callback = function(Value)
+            if Data.Callback then
+                Library:SafeCall(Data.Callback, Value)
+            elseif Data.callback then
+                Library:SafeCall(Data.callback, Value)
+            end
+        end
     })
 
     function Textbox:Set(Value)
@@ -5003,7 +5034,14 @@ Library.Sections.Listbox = function(self, Data)
         Callback = Listbox.Callback,
         Multi = Listbox.Multi,
         Items = Listbox.Items,
-        Size = Listbox.Size
+        Size = Listbox.Size,
+        Callback = function(Value)
+            if Data.Callback then
+                Library:SafeCall(Data.Callback, Value)
+            elseif Data.callback then
+                Library:SafeCall(Data.callback, Value)
+            end
+        end
     })
 
     function Listbox:Set(Option)
