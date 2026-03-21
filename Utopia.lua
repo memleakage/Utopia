@@ -1,4 +1,3 @@
-
 if getgenv().Library then
     getgenv().Library:Unload()
 end
@@ -5497,7 +5496,7 @@ for Index, Value in next, Library.Theme do
     if Library.ThemeColorpickers[Index] then
         Library.ThemeColorpickers[Index]:Set(Value)
     end
-end--]]
+end
 
 Window:SetOpen(true)
-Library.IsLoading = false
+Library.IsLoading = false--]]
