@@ -1279,11 +1279,11 @@ local Components = { } do
                 AnchorPoint = Vector2New(0.5, 1),
                 Name = "\0",
                 Position = UDim2New(0.5, 0, 1, 0),
-                Size = UDim2New(1, 0, 0, 2),
+                Size = UDim2New(1, -15, 0, 2),
                 ZIndex = 2,
                 BorderSizePixel = 0,
                 BackgroundColor3 = FromRGB(56, 56, 56)
-            })  Items["Liner"]:AddToTheme({BackgroundColor3 = "Dark Liner"})
+            }) Items["Liner"]:AddToTheme({BackgroundColor3 = "Dark Liner"})
 
             Instances:Create("UIGradient", {
                 Parent = Items["Liner"].Instance,
@@ -1304,7 +1304,7 @@ local Components = { } do
                 BackgroundTransparency = 1,
                 Position = UDim2New(0.5, 0, 1, 0),
                 Name = "\0",
-                Size = UDim2New(1, 2, 0, 0),
+                Size = UDim2New(1, -15, 0, 0), -- CHANGE THIS: from (1, 2) to (1, -15)
                 BorderSizePixel = 0,
                 BackgroundColor3 = FromRGB(31, 226, 130)
             })  Items["Glow"]:AddToTheme({BackgroundColor3 = "Accent"})
@@ -1396,7 +1396,7 @@ local Components = { } do
                 Items["Inactive"].Instance.TextColor3 = Library.Theme.Accent
                 Items["Liner"].Instance.BackgroundColor3 = Library.Theme.Accent
                 Items["Glow"].Instance.BackgroundTransparency = 0
-                Items["Glow"].Instance.Size = UDim2New(1, 2, 1, 0)
+                Items["Glow"].Instance.Size = UDim2New(1, -15, 1, 0) -- CHANGE THIS to (1, -15)
             else
                 Items["Inactive"]:ChangeItemTheme({TextColor3 = "Text"})
                 Items["Liner"]:ChangeItemTheme({BackgroundColor3 = "Dark Liner"})
@@ -1404,7 +1404,7 @@ local Components = { } do
                 Items["Inactive"].Instance.TextColor3 = Library.Theme.Text
                 Items["Liner"].Instance.BackgroundColor3 = Library.Theme["Dark Liner"]
                 Items["Glow"].Instance.BackgroundTransparency = 1
-                Items["Glow"].Instance.Size = UDim2New(1, 2, 0, 0)
+                Items["Glow"].Instance.Size = UDim2New(1, -15, 0, 0) -- CHANGE THIS to (1, -15)
             end
         end
 
