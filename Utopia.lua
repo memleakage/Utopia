@@ -1627,8 +1627,16 @@ local Components = { } do
 
             if Toggle.Keybinds then
                 for _, KeyBinds in next, Toggle.Keybinds do
-                    if not Bool then 
+                    if not Bool and KeyBinds.Toggled then
                         KeyBinds.Toggled = false
+                        Library.Flags[KeyBinds.Flag] = {
+                            Mode = KeyBinds.Mode,
+                            Key = KeyBinds.Key,
+                            Value = false
+                        }
+                        if KeyBinds.Callback and not Library.IsLoading then
+                            Library:SafeCall(KeyBinds.Callback, false)
+                        end
                     end
                     if KeyBinds._Update then KeyBinds._Update() end
                 end
@@ -3421,15 +3429,15 @@ Components.Keybind = function(Data)
             Library.Flags[Keybind.Flag] = {
                 Mode = Keybind.Mode,
                 Key = Keybind.Key,
-                Toggled = Keybind.Toggled
+                Value = Keybind.Toggled
             }
 
-            if Data.Callback and not Library.IsLoading then 
+            if Data.Callback and not Library.IsLoading then
                 Library:SafeCall(Data.Callback, Keybind.Toggled)
             end
 
             Update()
-        elseif TableFind({"Toggle", "Hold", "Always"}, Key) then 
+        elseif TableFind({"Toggle", "Hold", "Always"}, Key) then
             Keybind.Mode = Key
             
             Keybind:SetMode(Key)
@@ -3437,12 +3445,21 @@ Components.Keybind = function(Data)
             if Data.Callback and not Library.IsLoading then 
                 Library:SafeCall(Data.Callback, Keybind.Toggled)
             end
-        elseif type(Key) == "table" then 
+        elseif type(Key) == "table" then
             local RawKey = Key.Key
             local KeyName = (typeof(RawKey) == "EnumItem" and RawKey.Name) or tostring(RawKey)
             local IsUnbind = (KeyName == "Backspace" or KeyName == "Unknown")
 
-            Keybind.Key = tostring(RawKey)
+            local TextToDisplay
+
+            if IsUnbind then
+                Keybind.Key = nil
+                TextToDisplay = "[None]"
+            else
+                Keybind.Key = tostring(RawKey)
+                local KeyString = Keys[Keybind.Key] or StringGSub(tostring(RawKey), "Enum.", "") or tostring(RawKey)
+                TextToDisplay = "[" .. StringGSub(StringGSub(KeyString, "KeyCode.", ""), "UserInputType.", "") .. "]"
+            end
 
             if Key.Mode then
                 Keybind.Mode = Key.Mode
@@ -3452,20 +3469,10 @@ Components.Keybind = function(Data)
                 Keybind:SetMode("Toggle")
             end
 
-            local TextToDisplay
-
-            if IsUnbind then 
-                Keybind.Key = nil
-                TextToDisplay = "[None]"
-            else
-                local KeyString = Keys[Keybind.Key] or StringGSub(tostring(RawKey), "Enum.", "") or tostring(RawKey)
-                TextToDisplay = "[" .. StringGSub(StringGSub(KeyString, "KeyCode.", ""), "UserInputType.", "") .. "]"
-            end
-
             Keybind.Value = TextToDisplay
             Items["KeyButton"].Instance.Text = TextToDisplay
 
-            if Keybind.Callback then 
+            if Keybind.Callback then
                 Library:SafeCall(Keybind.Callback, Keybind.Toggled)
             end
 
@@ -3497,10 +3504,10 @@ Components.Keybind = function(Data)
         Library.Flags[Keybind.Flag] = {
             Mode = Keybind.Mode,
             Key = Keybind.Key,
-            Toggled = Keybind.Toggled
+            Value = Keybind.Toggled
         }
 
-        if Data.Callback and not Library.IsLoading then 
+        if Data.Callback and not Library.IsLoading then
             Library:SafeCall(Data.Callback, Keybind.Toggled)
         end
 
@@ -3525,10 +3532,10 @@ Components.Keybind = function(Data)
         Library.Flags[Keybind.Flag] = {
             Mode = Keybind.Mode,
             Key = Keybind.Key,
-            Toggled = Keybind.Toggled
+            Value = Keybind.Toggled
         }
 
-        if Data.Callback and not Library.IsLoading then 
+        if Data.Callback and not Library.IsLoading then
             Library:SafeCall(Data.Callback, Keybind.Toggled)
         end
 
