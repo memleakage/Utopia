@@ -518,7 +518,6 @@ Library.Unload = function(self)
         self.Flags = nil
     end
 
-    Library = nil 
     getgenv().Library = nil
 end
 
@@ -2232,6 +2231,7 @@ Components.Dropdown = function(Data)
     end
 
     function Dropdown:Refresh(List)
+        if not Library then return end
         for Index, Value in Dropdown.Options do 
             Dropdown:Remove(Value.Name)
         end
@@ -2242,6 +2242,7 @@ Components.Dropdown = function(Data)
     end
 
     function Dropdown:Add(Option)
+        if not Library or not Library.Font then return end
         local OptionButton = Instances:Create("TextButton", {
             Parent = Items["Holder"].Instance,
             FontFace = Library.Font,
@@ -3807,6 +3808,7 @@ Components.Listbox = function(Data)
     end
 
     function Listbox:Refresh(List)
+        if not Library then return end
         for Index, Value in Listbox.Options do 
             Listbox:Remove(Value.Name)
         end
@@ -3817,6 +3819,7 @@ Components.Listbox = function(Data)
     end
 
     function Listbox:Add(Option)
+        if not Library or not Library.Font then return end 
         local OptionButton = Instances:Create("TextButton", {
             Parent = Items["Holder"].Instance,
             FontFace = Library.Font,
@@ -4020,7 +4023,7 @@ Library.Window = function(self, Data)
                 if not Library or not Items["Text"] or not Items["Text"].Instance then 
                     return 
                 end
-                
+
                 local GradientOffset = MathAbs(MathSin(tick() * Window.GradientTitle.Speed))
                 UIGradient.Instance.Offset = Vector2New(GradientOffset, 0)   
             end)
@@ -4368,6 +4371,7 @@ Library.Pages.PlayerList = function(self, Data)
     end
 
     function Playerlist:Add(Player)
+        if not Library or not Library.Font then return end
         local PlayerButton = Instances:Create("TextButton", {
             Parent = Items["Holder"].Instance,
             FontFace = Library.Font,
