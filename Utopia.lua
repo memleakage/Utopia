@@ -3419,7 +3419,7 @@ Components.Keybind = function(Data)
                 TextToDisplay = "[None]"
             else
                 local KeyString = Keys[Keybind.Key] or StringGSub(tostring(RawKey), "Enum.", "") or tostring(RawKey)
-                TextToDisplay = StringGSub(StringGSub(KeyString, "KeyCode.", ""), "UserInputType.", "")
+                TextToDisplay = "[" .. StringGSub(StringGSub(KeyString, "KeyCode.", ""), "UserInputType.", "") .. "]"
             end
 
             Keybind.Value = TextToDisplay
