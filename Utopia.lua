@@ -2414,7 +2414,8 @@ Components.Colorpicker = function(Data)
         OnAnimationChanged = nil,
 
         CurrentAnimation = "",
-        AnimationSpeed = 0
+        CurrentAnimationSpeed = 0.1,
+        AnimationSpeed = 0.1
     }
 
     Library.Flags[Colorpicker.Flag] = { }
@@ -2448,18 +2449,19 @@ Components.Colorpicker = function(Data)
             LineJoinMode = Enum.LineJoinMode.Miter
         }):AddToTheme({Color = "Outline"})
 
-        local CalculateCount = function(Index)
-            local MaxButtonsAdded = 5
-
-            local Column = Index % MaxButtonsAdded
-        
-            local ButtonSize = Items["ColorpickerButton"].Instance.AbsoluteSize
-            local Spacing = 4
-        
-            local XPosition = (ButtonSize.X + Spacing) * Column - Spacing - 25
-        
-            Items["ColorpickerButton"].Instance.Position = UDim2New(1, -XPosition, 0.5, 0)
-        end
+local CalculateCount = function(Index)
+    local MaxButtonsAdded = 5
+    local Column = Index -- Use the index directly
+    
+    local ButtonWidth = 25 
+    local Spacing = 4
+    
+    -- When Index is 0, offset is 0 (far right)
+    -- As index increases, it moves left
+    local XPosition = (ButtonWidth + Spacing) * Column
+    
+    Items["ColorpickerButton"].Instance.Position = UDim2New(1, -XPosition, 0.5, 0)
+end
 
         CalculateCount(Data.Count)
 
@@ -3034,11 +3036,11 @@ Components.Colorpicker = function(Data)
             OldColor = Colorpicker.Color
             Library:Thread(function()
                 if not Colorpicker.CurrentAnimationSpeed then
-                    Colorpicker.CurrentAnimationSpeed = 1
+                    Colorpicker.CurrentAnimationSpeed = 0.1
                 end
 
                 while task.wait() do 
-                    if Colorpicker.CurrentAnimation ~= "Rainbow" then
+                    if not Library or Colorpicker.CurrentAnimation ~= "Rainbow" then
                         Colorpicker:Set(OldColor, Colorpicker.Alpha)
                         break
                     end
@@ -4015,6 +4017,10 @@ Library.Window = function(self, Data)
             Items["Text"].Instance.TextColor3 = FromRGB(255, 255, 255)
 
             Library:Connect(RunService.Heartbeat, function()
+                if not Library or not Items["Text"] or not Items["Text"].Instance then 
+                    return 
+                end
+                
                 local GradientOffset = MathAbs(MathSin(tick() * Window.GradientTitle.Speed))
                 UIGradient.Instance.Offset = Vector2New(GradientOffset, 0)   
             end)
@@ -4640,13 +4646,20 @@ Library.Sections.Toggle = function(self, Data)
             Alpha = Data.Alpha or false,
         }
 
+        local BtnCount = 0
+        for _, Child in pairs(Items["Toggle"].Instance:GetChildren()) do
+            if Child:IsA("TextButton") then
+                BtnCount = BtnCount + 1
+            end
+        end
+
         local NewColorpicker, ColorpickerItems = Components.Colorpicker({
             Name = Colorpicker.Name,
             Parent = Items["Toggle"],
             Flag = Colorpicker.Flag,
             Default = Colorpicker.Default,
             Callback = Colorpicker.Callback,
-            Count = #Items["Toggle"].Instance:GetChildren(),
+            Count = BtnCount,
             Alpha = Colorpicker.Alpha
         })
 
@@ -4893,30 +4906,21 @@ Library.Sections.Label = function(self, Text, Alignment)
             Count = Label.Count
         }
 
-        Label.Count += 1
-        Colorpicker.Count = Label.Count
-
         local NewColorpicker, ColorpickerItems = Components.Colorpicker({
             Name = Colorpicker.Name,
             Parent = Items["Label"],
             Flag = Colorpicker.Flag,
             Default = Colorpicker.Default,
             Callback = Colorpicker.Callback,
-            Count = Colorpicker.Count,
+            Count = Label.Count, -- This will now be 0 for the first one
             Alpha = Colorpicker.Alpha
         })
 
-        function Colorpicker:Set(Value, Alpha)
-            NewColorpicker:Set(Value, Alpha)
-        end
+        Label.Count += 1 -- Increment AFTER creating so the next one moves left
 
-        function Colorpicker:Get()
-            return NewColorpicker:Get()
-        end
-
-        function Colorpicker:SetVisibility(Bool)
-            NewColorpicker:SetVisibility(Bool)
-        end
+        function Colorpicker:Set(Value, Alpha) NewColorpicker:Set(Value, Alpha) end
+        function Colorpicker:Get() return NewColorpicker:Get() end
+        function Colorpicker:SetVisibility(Bool) NewColorpicker:SetVisibility(Bool) end
 
         return Colorpicker
     end
@@ -5073,3 +5077,367 @@ Library.Sections.Listbox = function(self, Data)
 end
 
 getgenv().Library = Library
+
+local Window = Library:Window({
+    Name = "U T O P I A",
+    Size = UDim2.new(0, 800, 0, 600),
+})
+
+Window:SetOpen(false)
+local Watermark = Library:Watermark("U T O P I A")
+local KeybindList = Library:KeybindList()
+
+Window:SetOpen(false)
+Watermark:SetVisibility(false)
+KeybindList:SetVisibility(false)
+
+local CombatTab = Window:Page({Name = "Main", Columns = 2  })
+local PlayersTab = Window:Page({Name = "Players", Columns = 1  })
+local SettingsTab = Window:Page({Name = "Settings", Columns = 2 })
+
+local AimbotSection = CombatTab:Section({Name = "Section", Side = 1 })
+
+PlayersTab:PlayerList({
+    Name = "PlayerList", 
+    Flag = "PlayerList", 
+    Callback = function(Players)
+        print(Players)
+    end
+})
+
+local Toggle = AimbotSection:Toggle({
+    Name = "Toggle", 
+    Default = false, 
+    Flag = "Toggle",
+    Callback = function(Value)
+        print(Value)
+    end
+}):Keybind({ 
+    Name = "Keybind", 
+    Flag = "Keybind", 
+    Default = Enum.KeyCode.Unknown, 
+    Mode = "Toggle", 
+    Callback = function(Value)
+        print(Value)
+    end
+})
+
+	AimbotSection:Toggle({
+		Name = "Range Indicator",
+		Default = false,
+		Flag = "RangeIndicator",
+	}):Colorpicker({
+		Flag = "KAColor",
+		Default = Color3.fromRGB(255, 255, 255),
+	})
+
+local Button = AimbotSection:Button({
+    Name = "Button", 
+    Callback = function()
+        print("Button")
+    end
+})
+
+local Slider = AimbotSection:Slider({
+    Name = "Slider", 
+    Flag = "Slider", 
+    Min = 0, 
+    Default = 0, 
+    Max = 100, 
+    Suffix = "%", 
+    Decimals = 1, 
+    Callback = function(Value)
+        print(Value)
+    end
+})
+
+local Dropdown = AimbotSection:Dropdown({
+    Name = "Dropdown", 
+    Flag = "Dropdown", 
+    Items = {"1", "2", "3"}, 
+    Multi = false,
+    Default = nil,
+    Callback = function(Value)
+        print(Value)
+    end
+})
+
+local Input = AimbotSection:Textbox({
+    Name = "Input",
+    Flag = "Input",
+    Default = "",
+    Placeholder = "Type Here",
+    Callback = function(Value)
+        print(Value)
+    end
+})
+
+local MultiDropdown = AimbotSection:Dropdown({
+    Name = "Multi Dropdown", 
+    Flag = "Multi Dropdown", 
+    Items = {"1", "2", "3"}, 
+    Default = nil,
+    Multi = true,
+    Callback = function(Value)
+        print(Value)
+    end
+})
+
+local ColorpickerLabel = AimbotSection:Label("Colorpicker", "Left")
+
+ColorpickerLabel:Colorpicker({ 
+    Name = "Colorpicker", 
+    Flag = "ColorBoi", 
+    Default = FromRGB(255, 255, 255), 
+    Callback = function(Value, Alpha)
+        print(Value, Alpha)
+    end
+})
+
+local ThemesSection = SettingsTab:Section({ Name = "Settings", Side = 1 })
+
+do
+    for Index, Value in Library.Theme do 
+        Library.ThemeColorpickers[Index] = ThemesSection:Label(Index, "Left"):Colorpicker({
+            Name = Index,
+            Flag = "Theme" .. Index,
+            Default = Value,
+            Callback = function(Value)
+                Library.Theme[Index] = Value
+                Library:ChangeTheme(Index, Value)
+            end
+        })
+    end
+
+    local ThemeName = ""
+    local SelectedTheme = nil
+
+    local ThemeNames = {"Default"}
+    for Name in next, Themes do
+        if Name ~= "Default" then 
+            table.insert(ThemeNames, Name)
+        end
+    end
+
+    ThemesSection:Dropdown({
+        Name = "Themes", 
+        Items = ThemeNames, 
+        Default = "Default", 
+        Callback = function(Value)
+            SelectedTheme = Value
+            Library:ApplyBuiltInTheme(Value)
+        end
+    })
+
+    local ThemesListbox = ThemesSection:Listbox({
+        Name = "Themes List",
+        Flag = "Themes List",
+        Items = { },
+        Multi = false,
+        Default = nil,
+        Callback = function(Value)
+            SelectedTheme = Value 
+        end
+    })
+
+    ThemesSection:Textbox({
+        Name = "Theme Name",
+        Flag = "Theme Name Input",
+        Default = "",
+        Placeholder = "Enter Name...",
+        Callback = function(Value)
+            ThemeName = Value
+        end
+    })
+
+    ThemesSection:Button({
+        Name = "Set Default",
+        Callback = function()
+            if SelectedTheme then
+                Library:SetDefault("Theme", SelectedTheme)
+            end
+        end
+    }):SubButton({
+        Name = "Clear Default",
+        Callback = function()
+            Library:RemoveDefault("Theme")
+        end
+    })
+
+    ThemesSection:Button({
+        Name = "Load",
+        Callback = function()
+            if SelectedTheme then
+                if Library.Themes[SelectedTheme] then
+                    Library:ApplyBuiltInTheme(SelectedTheme)
+                elseif isfile(Library.Folders.Themes .. "/" .. SelectedTheme) then
+                    Library:LoadTheme(readfile(Library.Folders.Themes .. "/" .. SelectedTheme))
+                end
+            end
+        end
+    }):SubButton({
+        Name = "Save",
+        Callback = function()
+            if SelectedTheme and not Library.Themes[SelectedTheme] then
+                Library:SaveTheme(SelectedTheme)
+            end
+        end
+    })
+
+    ThemesSection:Button({
+        Name = "Create",
+        Callback = function()
+            if ThemeName ~= "" then
+                local fileName = ThemeName .. ".json"
+                writefile(Library.Folders.Themes .. "/" .. fileName, Library:GetTheme())
+                Library:RefreshThemeList(ThemesListbox)
+            end
+        end
+    }):SubButton({
+        Name = "Delete",
+        Callback = function()
+            if SelectedTheme and not Library.Themes[SelectedTheme] then
+                Library:DeleteTheme(SelectedTheme)
+                Library:RefreshThemeList(ThemesListbox)
+                SelectedTheme = nil
+            end
+        end
+    })
+
+    ThemesSection:Button({
+        Name = "Refresh",
+        Callback = function()
+            Library:RefreshThemeList(ThemesListbox)
+        end
+    })
+
+    Library:RefreshThemeList(ThemesListbox)
+end
+
+local ConfigsSection = SettingsTab:Section({  Name = "Configs", Side = 2 })
+do 
+    local ConfigName 
+    local SelectedConfig 
+
+    local ConfigsListbox = ConfigsSection:Listbox({
+        Name = "Configs List",
+        Flag = "Configs List",
+        Items = { },
+        Multi = false,
+        Default = nil,
+        Callback = function(Value)
+            SelectedConfig = Value
+        end
+    })
+
+    ConfigsSection:Textbox({
+        Name = "Name",
+        Flag = "Config Name",
+        Default = "",
+        Placeholder = ". . .",
+        Callback = function(Value)
+            ConfigName = Value
+        end
+    })
+
+    ConfigsSection:Button({
+        Name = "Set Default",
+        Callback = function()
+            if SelectedConfig then
+                Library:SetDefault("Config", SelectedConfig)
+            end
+        end
+    }):SubButton({
+        Name = "Clear Default",
+        Callback = function()
+            Library:RemoveDefault("Config")
+        end
+    })
+
+    ConfigsSection:Button({
+        Name = "Load",
+        Callback = function()
+            if SelectedConfig then
+                if Library.Folders.Configs .. "/" .. SelectedConfig then
+                    Library:LoadConfig(readfile(Library.Folders.Configs .. "/" .. SelectedConfig))
+                end
+            end
+
+            Library:Thread(function()
+
+                for Index, Value in Library.Theme do 
+                    Library.Theme[Index] = Library.Flags["Theme"..Index].Color
+                    Library:ChangeTheme(Index, Library.Flags["Theme"..Index].Color)
+                end    
+            end)
+        end
+    }):SubButton({
+        Name = "Save",
+        Callback = function()
+            if SelectedConfig then
+                Library:SaveConfig(SelectedConfig)
+            end
+        end
+    })
+
+    ConfigsSection:Button({
+        Name = "Create",
+        Callback = function()
+            if ConfigName == "" then 
+                return
+            end
+
+            if not isfile(Library.Folders.Configs .. "/" .. ConfigName .. ".json") then
+                writefile(Library.Folders.Configs .. "/" .. ConfigName .. ".json", Library:GetConfig())
+                Library:RefreshConfigsList(ConfigsListbox)
+            else
+                return
+            end
+        end
+    }):SubButton({
+        Name = "Delete",
+        Callback = function()
+            if SelectedConfig then
+                Library:DeleteConfig(SelectedConfig)
+
+                Library:RefreshConfigsList(ConfigsListbox)
+            end
+        end
+    })
+
+    ConfigsSection:Button({
+        Name = "Refresh",
+        Callback = function()
+            Library:RefreshConfigsList(ConfigsListbox)
+        end
+    })
+
+    Library:RefreshConfigsList(ConfigsListbox)
+
+    ConfigsSection:Label("Menu Keybind", "Left"):Keybind({Name = "Menu Keybind", Flag = "Menu Keybind", Default = Enum.KeyCode.Insert, Mode = "Toggle", Callback = function(Value)
+        Library.MenuKeybind = Library.Flags["Menu Keybind"].Key
+    end})
+
+    ConfigsSection:Toggle({Name = "Watermark", Flag = "Watermark", Default = false, Callback = function(Value)
+        Watermark:SetVisibility(Value)
+    end})
+
+    ConfigsSection:Toggle({Name = "Keybind List", Flag = "Keybind List", Default = false, Callback = function(Value)
+        KeybindList:SetVisibility(Value)
+    end})
+
+    ConfigsSection:Button({Name = "Unload Menu", Callback = function()
+        Library:Unload()
+    end})
+end
+
+Library:ApplyDefaults() 
+
+for Index, Value in next, Library.Theme do
+    if Library.ThemeColorpickers[Index] then
+        Library.ThemeColorpickers[Index]:Set(Value)
+    end
+end
+
+Window:SetOpen(true)
+Library.IsLoading = false
