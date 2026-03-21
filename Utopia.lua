@@ -5138,7 +5138,7 @@ end
 
 getgenv().Library = Library
 
-local Window = Library:Window({
+--[[local Window = Library:Window({
     Name = "U T O P I A",
     Size = UDim2.new(0, 800, 0, 600),
 })
@@ -5497,7 +5497,7 @@ for Index, Value in next, Library.Theme do
     if Library.ThemeColorpickers[Index] then
         Library.ThemeColorpickers[Index]:Set(Value)
     end
-end
+end--]]
 
 Window:SetOpen(true)
 Library.IsLoading = false
