@@ -509,9 +509,13 @@ Library.Unload = function(self)
         Value.Connection:Disconnect()
     end
 
+    self.Connections = {}
+
     for Index, Value in self.Threads do 
         coroutine.close(Value)
     end
+
+    self.Threads = {}
 
     if self.Holder then 
         self.Holder:Clean()
@@ -4579,6 +4583,8 @@ Library.Pages.PlayerList = function(self, Data)
     end)
 
     Library:Connect(Players.PlayerAdded, function(Player)
+        if not Library or not MainFont then return end 
+        
         Playerlist:Add(Player)
     end)
 
