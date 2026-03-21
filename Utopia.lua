@@ -1,3 +1,4 @@
+
 if getgenv().Library then
     getgenv().Library:Unload()
 end
@@ -455,8 +456,11 @@ local CustomFont = { } do
     Library.Font = MainFont
 end
 
+local FallbackFont = Font.fromEnum(Enum.Font.SourceSans)
+
 local function GetFont()
-    return MainFont or (Library and Library.Font) or Font.fromEnum(Enum.Font.SourceSans)
+    if Library and Library.Unloaded then return FallbackFont end
+    return MainFont or (Library and Library.Font) or FallbackFont
 end
 
 Library.Holder = Instances:Create("ScreenGui", {
@@ -510,22 +514,40 @@ Library.IsMouseOverFrame = function(self, Frame)
     end
 end
 
+Library.OnUnloadCallbacks = { }
+
+Library.OnUnload = function(self, Callback)
+    if type(Callback) == "function" then
+        TableInsert(self.OnUnloadCallbacks, Callback)
+    end
+end
+
 Library.Unload = function(self)
-    for Index, Value in self.Connections do 
-        Value.Connection:Disconnect()
+    self.Unloaded = true
+
+    for _, Callback in next, self.OnUnloadCallbacks do
+        pcall(Callback)
     end
 
-    for Index, Value in self.Threads do 
-        coroutine.close(Value)
+    for Index, Value in self.Connections do
+        if Value.Connection then
+            pcall(function() Value.Connection:Disconnect() end)
+        end
     end
 
-    if self.Holder then 
+    for Index, Value in self.Threads do
+        pcall(coroutine.close, Value)
+    end
+
+    if self.Holder then
         self.Holder:Clean()
     end
 
-    if self.Flags then 
-        self.Flags = nil
-    end
+    self.Font = nil
+    self.Flags = nil
+    self.Connections = {}
+    self.Threads = {}
+    self.OnUnloadCallbacks = nil
 
     getgenv().Library = nil
 end
@@ -559,15 +581,20 @@ end
 Library.Connect = function(self, Event, Callback, Name)
     Name = Name or StringFormat("Connection_%s_%s", self.UnnamedConnections + 1, HttpService:GenerateGUID(false))
 
+    local WrappedCallback = function(...)
+        if self.Unloaded then return end
+        return Callback(...)
+    end
+
     local NewConnection = {
         Event = Event,
-        Callback = Callback,
+        Callback = WrappedCallback,
         Name = Name,
         Connection = nil
     }
 
     Library:Thread(function()
-        NewConnection.Connection = Event:Connect(Callback)
+        NewConnection.Connection = Event:Connect(WrappedCallback)
     end)
 
     TableInsert(self.Connections, NewConnection)
@@ -2191,9 +2218,16 @@ Components.Dropdown = function(Data)
     end
 
     function Dropdown:SetOpen(Bool)
-        Dropdown.IsOpen = Bool 
+        Dropdown.IsOpen = Bool
 
-        if Dropdown.IsOpen then 
+        if Bool then
+            TableInsert(Library.CurrentFrames, Dropdown)
+        else
+            local Idx = TableFind(Library.CurrentFrames, Dropdown)
+            if Idx then TableRemove(Library.CurrentFrames, Idx) end
+        end
+
+        if Dropdown.IsOpen then
             Debounce = true
 
             local ListLayout = Items["Holder"].Instance:FindFirstChildWhichIsA("UIListLayout")
@@ -2940,11 +2974,18 @@ Components.Colorpicker = function(Data)
     function Colorpicker:SetOpen(Bool)
         Colorpicker.IsOpen = Bool
 
-        if Colorpicker.IsOpen then 
-            Debounce = true 
+        if Bool then
+            TableInsert(Library.CurrentFrames, Colorpicker)
+        else
+            local Idx = TableFind(Library.CurrentFrames, Colorpicker)
+            if Idx then TableRemove(Library.CurrentFrames, Idx) end
+        end
+
+        if Colorpicker.IsOpen then
+            Debounce = true
             Items["ColorpickerWindow"]["Outline"].Instance.Position = UDim2New(0, Items["ColorpickerButton"].Instance.AbsolutePosition.X, 0, Items["ColorpickerButton"].Instance.AbsolutePosition.Y + 225)
 
-            Items["ColorpickerWindow"]["Outline"].Instance.Visible = true 
+            Items["ColorpickerWindow"]["Outline"].Instance.Visible = true
             Items["ColorpickerWindow"]["Outline"].Instance.ZIndex = 25
 
             for Index, Value in Items["ColorpickerWindow"]["Outline"].Instance:GetDescendants() do 
@@ -4097,6 +4138,14 @@ Library.Window = function(self, Data)
         Window.IsOpen = Bool
 
         Items["Outline"].Instance.Visible = Bool
+
+        if not Bool then
+            for _, Frame in next, Library.CurrentFrames do
+                if Frame.SetOpen then
+                    Frame:SetOpen(false)
+                end
+            end
+        end
     end
 
     Library:Connect(UserInputService.InputBegan, function(Input, GameProcessed)
@@ -5089,7 +5138,7 @@ end
 
 getgenv().Library = Library
 
---[[local Window = Library:Window({
+local Window = Library:Window({
     Name = "U T O P I A",
     Size = UDim2.new(0, 800, 0, 600),
 })
@@ -5451,4 +5500,4 @@ for Index, Value in next, Library.Theme do
 end
 
 Window:SetOpen(true)
-Library.IsLoading = false--]]
+Library.IsLoading = false
