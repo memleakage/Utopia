@@ -56,10 +56,10 @@ local Library = {
     MenuKeybind = tostring(Enum.KeyCode.RightControl), 
 
     Folders = {
-        Directory = "testpath",
-        Configs = "testpath/Configs",
-        Assets = "testpath/Assets",
-        Themes = "testpath/Themes"
+        Directory = "ReHydra",
+        Configs = "ReHydra/Configs",
+        Assets = "ReHydra/Assets",
+        Themes = "ReHydra/Themes"
     },
 
     Images = { 
@@ -188,16 +188,16 @@ end
 
 local Themes = {
     ["Default"] = {
-        ["Window Background"] = FromRGB(71, 71, 71),
-        ["Inline"] = FromRGB(30, 30, 30),
-        ["Text"] = FromRGB(244, 239, 232),
-        ["Section Background"] = FromRGB(20, 20, 20),
-        ["Element"] = FromRGB(33, 33, 33),
-        ["Border"] = FromRGB(0, 0, 0),
-        ["Outline"] = FromRGB(51, 51, 51),
-        ["Dark Liner"] = FromRGB(22, 22, 20),
-        ["Risky"] = FromRGB(255, 50, 50),
-        ["Accent"] = FromRGB(237, 170, 0)
+        ["Window Background"] = FromRGB(12, 12, 16),
+        ["Inline"] = FromRGB(18, 18, 25),
+        ["Text"] = FromRGB(220, 220, 230),
+        ["Section Background"] = FromRGB(15, 15, 22),
+        ["Element"] = FromRGB(22, 22, 30),
+        ["Border"] = FromRGB(35, 35, 45),
+        ["Outline"] = FromRGB(5, 5, 8),
+        ["Dark Liner"] = FromRGB(28, 28, 38),
+        ["Risky"] = FromRGB(255, 75, 75),
+        ["Accent"] = FromRGB(140, 100, 255)
     },
 
     ["Primordial"] = {
@@ -213,7 +213,7 @@ local Themes = {
         ["Accent"] = FromRGB(226, 165, 174)
     },
 
-    ["Midnight"] = {
+    --[[["Midnight"] = {
         ["Window Background"] = FromRGB(12, 12, 16),
         ["Inline"] = FromRGB(18, 18, 25),
         ["Text"] = FromRGB(220, 220, 230),
@@ -224,7 +224,20 @@ local Themes = {
         ["Dark Liner"] = FromRGB(28, 28, 38),
         ["Risky"] = FromRGB(255, 75, 75),
         ["Accent"] = FromRGB(140, 100, 255)
-    },
+    },--]]
+
+    ["Onetap"] = {
+        ["Window Background"] = FromRGB(71, 71, 71),
+        ["Inline"] = FromRGB(30, 30, 30),
+        ["Text"] = FromRGB(244, 239, 232),
+        ["Section Background"] = FromRGB(20, 20, 20),
+        ["Element"] = FromRGB(33, 33, 33),
+        ["Border"] = FromRGB(0, 0, 0),
+        ["Outline"] = FromRGB(51, 51, 51),
+        ["Dark Liner"] = FromRGB(22, 22, 20),
+        ["Risky"] = FromRGB(255, 50, 50),
+        ["Accent"] = FromRGB(237, 170, 0)
+    }
 }
 
 
