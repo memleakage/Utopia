@@ -3566,6 +3566,7 @@ Components.Keybind = function(Data)
     end)
 
     Items["KeyButton"]:Connect("MouseButton2Down", function()
+        if Data.AlwaysOn then return end
         Keybind:SetOpen(not Keybind.IsOpen)
     end)
 
@@ -4667,10 +4668,15 @@ Library.Sections.Toggle = function(self, Data)
         Default = Data.Default or Data.default or false,
         Callback = Data.Callback or Data.callback or function() end,
         Risky = Data.Risky or Data.risky or false,
+        Always = Data.Always or false,
 
         Value = false,
         Keybinds = {}
     }
+
+    if Toggle.Always then
+        Toggle.Default = true
+    end
 
     local NewToggle, Items = Components.Toggle({
         Name = Toggle.Name,
@@ -4679,6 +4685,10 @@ Library.Sections.Toggle = function(self, Data)
         Flag = Toggle.Flag,
         Default = Toggle.Default,
         Callback = function(Value)
+            if Toggle.Always and not Value then
+                NewToggle:Set(true)
+                return
+            end
             Toggle.Value = Value
             if Data.Callback or Data.callback then
                 Library:SafeCall(Data.Callback or Data.callback, Value)
@@ -4689,6 +4699,7 @@ Library.Sections.Toggle = function(self, Data)
     NewToggle.Keybinds = Toggle.Keybinds
 
     function Toggle:Set(Value)
+        if Toggle.Always and not Value then return end
         NewToggle:Set(Value)
     end
 
@@ -4755,10 +4766,11 @@ Library.Sections.Toggle = function(self, Data)
             Default = Keybind.Default,
             Mode = Keybind.Mode,
             Callback = Keybind.Callback,
-            ParentToggle = Toggle 
+            ParentToggle = Toggle,
+            AlwaysOn = Toggle.Always
         })
 
-        table.insert(Toggle.Keybinds, NewKeybind) 
+        table.insert(Toggle.Keybinds, NewKeybind)
 
         function Keybind:Set(Value) NewKeybind:Set(Value) end
         function Keybind:Get() return NewKeybind:Get() end
