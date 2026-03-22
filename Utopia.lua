@@ -13,7 +13,7 @@ local HttpService = cloneref(game:GetService("HttpService"))
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 
-local LocalPlayer = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer 
 local Camera = Workspace.CurrentCamera
 local Mouse = LocalPlayer:GetMouse()
 
@@ -3335,6 +3335,11 @@ Components.Keybind = function(Data)
             TextSize = 12,
             BackgroundColor3 = FromRGB(31, 226, 130)
         })  Items["Always"]:AddToTheme({TextColor3 = "Text"})
+
+        if Data.HideAlways then
+            Items["Always"].Instance.Visible = false
+            Items["KeybindWindow"]["Outline"].Instance.Size = UDim2New(0, 70, 0, 52)
+        end
     end
 
     local Modes = {
@@ -3566,7 +3571,6 @@ Components.Keybind = function(Data)
     end)
 
     Items["KeyButton"]:Connect("MouseButton2Down", function()
-        if Data.AlwaysOn then return end
         Keybind:SetOpen(not Keybind.IsOpen)
     end)
 
@@ -4668,15 +4672,11 @@ Library.Sections.Toggle = function(self, Data)
         Default = Data.Default or Data.default or false,
         Callback = Data.Callback or Data.callback or function() end,
         Risky = Data.Risky or Data.risky or false,
-        Always = Data.Always or false,
+        Always = Data.Always,
 
         Value = false,
         Keybinds = {}
     }
-
-    if Toggle.Always then
-        Toggle.Default = true
-    end
 
     local NewToggle, Items = Components.Toggle({
         Name = Toggle.Name,
@@ -4685,10 +4685,6 @@ Library.Sections.Toggle = function(self, Data)
         Flag = Toggle.Flag,
         Default = Toggle.Default,
         Callback = function(Value)
-            if Toggle.Always and not Value then
-                NewToggle:Set(true)
-                return
-            end
             Toggle.Value = Value
             if Data.Callback or Data.callback then
                 Library:SafeCall(Data.Callback or Data.callback, Value)
@@ -4699,7 +4695,6 @@ Library.Sections.Toggle = function(self, Data)
     NewToggle.Keybinds = Toggle.Keybinds
 
     function Toggle:Set(Value)
-        if Toggle.Always and not Value then return end
         NewToggle:Set(Value)
     end
 
@@ -4767,7 +4762,7 @@ Library.Sections.Toggle = function(self, Data)
             Mode = Keybind.Mode,
             Callback = Keybind.Callback,
             ParentToggle = Toggle,
-            AlwaysOn = Toggle.Always
+            HideAlways = Toggle.Always == false
         })
 
         table.insert(Toggle.Keybinds, NewKeybind)
