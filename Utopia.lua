@@ -3533,6 +3533,12 @@ Components.Keybind = function(Data)
     end
 
     function Keybind:Press(Bool)
+        if Data.ParentToggle and not Data.ParentToggle.Value then
+            Keybind.Toggled = false
+            Update()
+            return
+        end
+
         if Keybind.Mode == "Toggle" then
             Keybind.Toggled = not Keybind.Toggled
         elseif Keybind.Mode == "Hold" then
