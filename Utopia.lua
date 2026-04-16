@@ -5152,6 +5152,8 @@ end
 
 getgenv().Library = Library
 
+return Library
+
 --[[local Window = Library:Window({
     Name = "U T O P I A",
     Size = UDim2.new(0, 800, 0, 600),
